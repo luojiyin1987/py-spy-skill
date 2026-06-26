@@ -3,6 +3,7 @@
 *.speedscope.json
 py-spy-profile.*
 py-spy-dump.txt
+py-spy-*analysis.md
 profile.svg
 stack.txt
 
