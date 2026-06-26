@@ -16,6 +16,7 @@ Environment:
   PY_SPY_RATE=100             Sampling rate for record-pid / record-cmd
   PY_SPY_SUBPROCESSES=1       Add --subprocesses for worker pools
   PY_SPY_FORMAT=flamegraph    flamegraph | speedscope | raw | chrometrace
+  PY_SPY_DURATION=30          Duration for record-cmd
 
 Safety:
   - This helper never runs sudo.
@@ -34,7 +35,7 @@ need_py_spy() {
   command -v py-spy >/dev/null 2>&1 || fail "py-spy not found. Install with: pip install py-spy"
 }
 
-is_pid() {
+is_integer() {
   [[ "${1:-}" =~ ^[0-9]+$ ]]
 }
 
@@ -52,6 +53,8 @@ common_record_flags() {
   local flags=()
   local rate="${PY_SPY_RATE:-100}"
   local format="${PY_SPY_FORMAT:-flamegraph}"
+
+  is_integer "$rate" || fail "PY_SPY_RATE must be an integer"
 
   flags+=(--rate "$rate")
   flags+=(--format "$format")
@@ -90,8 +93,8 @@ case "$cmd" in
     output="${3:-py-spy-profile.svg}"
     duration="${4:-30}"
 
-    is_pid "$pid" || fail "record-pid requires a numeric PID"
-    is_pid "$duration" || fail "duration must be an integer number of seconds"
+    is_integer "$pid" || fail "record-pid requires a numeric PID"
+    is_integer "$duration" || fail "duration must be an integer number of seconds"
     [[ -d "/proc/$pid" || "$(uname -s)" != "Linux" ]] || fail "PID $pid not found under /proc"
 
     printf 'Target PID %s: ' "$pid"
@@ -107,7 +110,7 @@ case "$cmd" in
     pid="${2:-}"
     output="${3:-py-spy-dump.txt}"
 
-    is_pid "$pid" || fail "dump-pid requires a numeric PID"
+    is_integer "$pid" || fail "dump-pid requires a numeric PID"
     [[ -d "/proc/$pid" || "$(uname -s)" != "Linux" ]] || fail "PID $pid not found under /proc"
 
     printf 'Target PID %s: ' "$pid"
@@ -121,20 +124,30 @@ case "$cmd" in
   top-pid)
     need_py_spy
     pid="${2:-}"
-    is_pid "$pid" || fail "top-pid requires a numeric PID"
+    is_integer "$pid" || fail "top-pid requires a numeric PID"
     py-spy top --pid "$pid"
     ;;
 
   record-cmd)
     need_py_spy
-    output="${2:-py-spy-profile.svg}"
-    shift 2 || true
+    shift
+    output="py-spy-profile.svg"
+
+    if [[ "${1:-}" != "--" ]]; then
+      output="${1:-}"
+      [[ -n "$output" ]] || fail "record-cmd requires: record-cmd [OUTPUT.svg] -- <command...>"
+      shift
+    fi
+
     [[ "${1:-}" == "--" ]] || fail "record-cmd requires: record-cmd [OUTPUT.svg] -- <command...>"
     shift
     [[ "$#" -gt 0 ]] || fail "record-cmd requires a command after --"
 
+    duration="${PY_SPY_DURATION:-30}"
+    is_integer "$duration" || fail "PY_SPY_DURATION must be an integer"
+
     mapfile -d '' flags < <(common_record_flags)
-    py-spy record "${flags[@]}" --duration "${PY_SPY_DURATION:-30}" -o "$output" -- "$@"
+    py-spy record "${flags[@]}" --duration "$duration" -o "$output" -- "$@"
     printf 'Wrote profile: %s\n' "$output"
     ;;
 
