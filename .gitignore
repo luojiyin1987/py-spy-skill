@@ -1,0 +1,16 @@
+# py-spy output artifacts
+*.svg
+*.speedscope.json
+py-spy-profile.*
+py-spy-dump.txt
+profile.svg
+stack.txt
+
+# Python cache
+__pycache__/
+*.py[cod]
+
+# OS/editor files
+.DS_Store
+.vscode/
+.idea/
