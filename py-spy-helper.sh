@@ -11,6 +11,7 @@ Usage:
   ./py-spy-helper.sh dump-pid <PID> [OUTPUT.txt]
   ./py-spy-helper.sh top-pid <PID>
   ./py-spy-helper.sh record-cmd [OUTPUT.svg] -- <python command...>
+  ./py-spy-helper.sh analyze-flamegraph <INPUT.svg> [OUTPUT.md] [TOP_N]
 
 Environment:
   PY_SPY_RATE=100             Sampling rate for record-pid / record-cmd
@@ -33,6 +34,14 @@ fail() {
 
 need_py_spy() {
   command -v py-spy >/dev/null 2>&1 || fail "py-spy not found. Install with: pip install py-spy"
+}
+
+need_python3() {
+  command -v python3 >/dev/null 2>&1 || fail "python3 not found"
+}
+
+script_dir() {
+  cd "$(dirname "${BASH_SOURCE[0]}")" && pwd
 }
 
 is_integer() {
@@ -149,6 +158,22 @@ case "$cmd" in
     mapfile -d '' flags < <(common_record_flags)
     py-spy record "${flags[@]}" --duration "$duration" -o "$output" -- "$@"
     printf 'Wrote profile: %s\n' "$output"
+    ;;
+
+  analyze-flamegraph)
+    need_python3
+    input="${2:-}"
+    output="${3:-py-spy-flamegraph-analysis.md}"
+    top_n="${4:-10}"
+
+    [[ -n "$input" ]] || fail "analyze-flamegraph requires an input SVG"
+    [[ -f "$input" ]] || fail "input file not found: $input"
+    is_integer "$top_n" || fail "TOP_N must be an integer"
+
+    analyzer="$(script_dir)/scripts/analyze-flamegraph.py"
+    [[ -f "$analyzer" ]] || fail "analyzer script not found: $analyzer"
+
+    python3 "$analyzer" "$input" --output "$output" --top "$top_n"
     ;;
 
   -h|--help|help|'')
