@@ -18,7 +18,7 @@ fail() {
 bash -n "$HELPER"
 bash -n "$0"
 
-helper_output="$($HELPER --help)"
+helper_output="$(bash "$HELPER" --help)"
 printf '%s\n' "$helper_output" | grep -q 'record-pid' || fail "helper help missing record-pid"
 printf '%s\n' "$helper_output" | grep -q 'dump-pid' || fail "helper help missing dump-pid"
 printf '%s\n' "$helper_output" | grep -q 'never runs sudo' || fail "helper help missing safety language"
