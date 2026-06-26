@@ -135,11 +135,35 @@ When a privileged command is necessary, present it as a suggestion and ask for e
 
 ### Flamegraph
 
-Look for wide frames. A wide frame means many samples were observed in that call path. Explain:
+When the user provides a flamegraph, speedscope profile, raw sample output, or screenshot of a flamegraph, use `docs/flamegraph-interpretation-template.md` as the report structure.
 
-- which stack dominates
-- whether the hotspot is user code, framework code, serialization, database client, regex, compression, JSON, logging, or native extension
-- whether the result suggests CPU-bound work or waiting around external resources
+Core reading rules:
+
+- Width matters: a wider frame means more samples were observed in that stack.
+- Height is call depth, not cost by itself.
+- Left-to-right order is not chronological time.
+- Color is usually for visual grouping and does not mean hot/cold unless the renderer explicitly says so.
+- A single short profile is evidence, not proof. Use confidence levels.
+- Check whether the profile included subprocesses, native stacks, idle frames, or GIL-only samples.
+
+Minimum answer shape:
+
+```md
+结论：<one-sentence main finding>
+
+最热路径：
+`<root> -> <function> -> <hotspot>`
+
+判断：这是 <CPU / IO / lock / native / GIL / inconclusive> 问题，置信度 <low / medium / high>。
+
+证据：
+- <evidence 1>
+- <evidence 2>
+
+下一步：
+1. <safe next step>
+2. <optional deeper profile>
+```
 
 ### `top`
 
@@ -192,5 +216,6 @@ For C, C++, Cython, NumPy, or other native-heavy workloads, suggest `--native` o
 ## Notes
 
 - Helper script: `py-spy-helper.sh`
+- Flamegraph template: `docs/flamegraph-interpretation-template.md`
 - Smoke test: `scripts/smoke-py-spy-skill.sh`
 - Upstream project: https://github.com/benfred/py-spy
