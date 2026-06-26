@@ -16,6 +16,7 @@ Use this Skill when diagnosing Python runtime problems such as:
 - flamegraph or stack dump collection
 - structured flamegraph interpretation reports
 - automatic first-pass flamegraph hotspot extraction
+- first-pass dump analysis for hangs, waits, and lock contention
 
 ## What this Skill is not for
 
@@ -39,7 +40,7 @@ Alternative installation methods include downloading upstream releases or using 
 After cloning this repository:
 
 ```bash
-chmod +x py-spy-helper.sh scripts/smoke-py-spy-skill.sh scripts/analyze-flamegraph.py
+chmod +x py-spy-helper.sh scripts/smoke-py-spy-skill.sh scripts/analyze-flamegraph.py scripts/analyze-dump.py
 bash scripts/smoke-py-spy-skill.sh
 ```
 
@@ -67,6 +68,12 @@ Dump current Python stack traces:
 ./py-spy-helper.sh dump-pid <PID> stack.txt
 ```
 
+Analyze the generated dump:
+
+```bash
+./py-spy-helper.sh analyze-dump stack.txt dump-analysis.md 10
+```
+
 Open a live top-like view:
 
 ```bash
@@ -78,6 +85,17 @@ Record a Python command launched by `py-spy`:
 ```bash
 ./py-spy-helper.sh record-cmd profile.svg -- python app.py
 ```
+
+## Bottleneck Workflow
+
+Use [`docs/bottleneck-decision-tree.md`](docs/bottleneck-decision-tree.md) before picking a command. Not every performance issue is a CPU flamegraph problem.
+
+Common starting points:
+
+- high CPU: `record-pid` -> `analyze-flamegraph`
+- stuck or hanging process: `dump-pid` -> `analyze-dump`
+- worker pools: use `--subprocesses` or profile the specific worker PID
+- slow request but low CPU: correlate with logs, traces, SQL timing, or external service latency
 
 ## Flamegraph Interpretation
 
@@ -98,6 +116,20 @@ The template emphasizes:
 - confidence levels for short captures
 - bottleneck classification: CPU, I/O, lock, native, GIL, idle, or inconclusive
 - safe next steps before privileged profiling changes
+
+## Dump Interpretation
+
+Use `analyze-dump` for hangs, waiting threads, possible deadlocks, queue pressure, and low-CPU slowness:
+
+```bash
+./py-spy-helper.sh analyze-dump py-spy-dump.txt dump-analysis.md 10
+```
+
+The dump analyzer groups repeated leaf frames and classifies common wait patterns such as lock contention, async event loop wait, network I/O, database/ORM, sleep/timer, logging, and serialization/parsing.
+
+## Cookbook
+
+- [`docs/cookbook/high-cpu.md`](docs/cookbook/high-cpu.md): high CPU process or worker workflow
 
 ## Safety Model
 
@@ -121,6 +153,7 @@ cp -r /path/to/py-spy-skill ~/.claude/skills/py-spy
 chmod +x ~/.claude/skills/py-spy/py-spy-helper.sh
 chmod +x ~/.claude/skills/py-spy/scripts/smoke-py-spy-skill.sh
 chmod +x ~/.claude/skills/py-spy/scripts/analyze-flamegraph.py
+chmod +x ~/.claude/skills/py-spy/scripts/analyze-dump.py
 ```
 
 Then start a new Claude Code session and ask:
@@ -146,6 +179,7 @@ cp -r /path/to/py-spy-skill "$SKILLS_DIR/py-spy"
 chmod +x "$SKILLS_DIR/py-spy/py-spy-helper.sh"
 chmod +x "$SKILLS_DIR/py-spy/scripts/smoke-py-spy-skill.sh"
 chmod +x "$SKILLS_DIR/py-spy/scripts/analyze-flamegraph.py"
+chmod +x "$SKILLS_DIR/py-spy/scripts/analyze-dump.py"
 ```
 
 ## Attribution
