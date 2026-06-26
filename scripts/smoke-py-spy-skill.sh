@@ -5,6 +5,7 @@ ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 HELPER="$ROOT_DIR/py-spy-helper.sh"
 SKILL="$ROOT_DIR/SKILL.md"
 README="$ROOT_DIR/README.md"
+FLAMEGRAPH_TEMPLATE="$ROOT_DIR/docs/flamegraph-interpretation-template.md"
 
 fail() {
   printf 'error: %s\n' "$*" >&2
@@ -14,6 +15,7 @@ fail() {
 [[ -f "$SKILL" ]] || fail "missing SKILL.md"
 [[ -f "$README" ]] || fail "missing README.md"
 [[ -f "$HELPER" ]] || fail "missing py-spy-helper.sh"
+[[ -f "$FLAMEGRAPH_TEMPLATE" ]] || fail "missing flamegraph interpretation template"
 
 bash -n "$HELPER"
 bash -n "$0"
@@ -26,5 +28,8 @@ printf '%s\n' "$helper_output" | grep -q 'never runs sudo' || fail "helper help 
 grep -q '^name: py-spy$' "$SKILL" || fail "SKILL.md missing name frontmatter"
 grep -q 'Do not automatically run `sudo`' "$SKILL" || fail "SKILL.md missing sudo safety rule"
 grep -q 'Do not use `py-spy dump --locals` unless the user explicitly confirms' "$SKILL" || fail "SKILL.md missing locals safety rule"
+grep -q 'docs/flamegraph-interpretation-template.md' "$SKILL" || fail "SKILL.md missing flamegraph template reference"
+grep -q 'Bottleneck Classification' "$FLAMEGRAPH_TEMPLATE" || fail "flamegraph template missing bottleneck classification section"
+grep -q 'Final Answer Shape' "$FLAMEGRAPH_TEMPLATE" || fail "flamegraph template missing final answer shape"
 
 printf 'py-spy skill smoke test passed.\n'
