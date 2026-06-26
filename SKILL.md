@@ -91,7 +91,7 @@ Treat the generated report as triage input. The agent must still inspect the fla
 
 ### Stack dump for a stuck process
 
-Use when the process is hanging, deadlocked, waiting, or not making progress.
+Use when the process is hanging, deadlocked, waiting, or not making progress. For full scenario guidance, use `docs/cookbook/hanging-process.md`.
 
 ```bash
 py-spy dump --pid <PID> > py-spy-dump.txt
@@ -279,5 +279,6 @@ If CPU is not high and dump/flamegraph results are inconclusive while latency gr
 - Bottleneck decision tree: `docs/bottleneck-decision-tree.md`
 - Flamegraph template: `docs/flamegraph-interpretation-template.md`
 - High CPU cookbook: `docs/cookbook/high-cpu.md`
+- Hanging process cookbook: `docs/cookbook/hanging-process.md`
 - Smoke test: `scripts/smoke-py-spy-skill.sh`
 - Upstream project: https://github.com/benfred/py-spy
