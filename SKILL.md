@@ -13,6 +13,7 @@ Use this skill when the user needs to diagnose Python runtime behavior with `py-
 - gunicorn, uvicorn, celery, multiprocessing, or worker-pool issues
 - generating flamegraphs, speedscope profiles, or stack dumps
 - interpreting `py-spy top`, `record`, or `dump` output
+- extracting first-pass hotspot reports from py-spy SVG flamegraphs
 
 This skill wraps the upstream `py-spy` CLI. It does not modify `py-spy` source code.
 
@@ -73,6 +74,16 @@ Helper form:
 ```bash
 ./py-spy-helper.sh record-pid <PID> profile.svg 30
 ```
+
+### First-pass flamegraph analysis
+
+Use after generating an SVG flamegraph with `py-spy record`. This extracts frame titles from the SVG, sorts by sample percentage, applies coarse categories, and writes a Markdown report.
+
+```bash
+./py-spy-helper.sh analyze-flamegraph profile.svg profile-analysis.md 10
+```
+
+Treat the generated report as triage input. The agent must still inspect the flamegraph context and apply the interpretation template before giving final advice.
 
 ### Stack dump for a stuck process
 
@@ -136,6 +147,14 @@ When a privileged command is necessary, present it as a suggestion and ask for e
 ### Flamegraph
 
 When the user provides a flamegraph, speedscope profile, raw sample output, or screenshot of a flamegraph, use `docs/flamegraph-interpretation-template.md` as the report structure.
+
+For SVG flamegraphs, first run this when the file is available in the workspace:
+
+```bash
+./py-spy-helper.sh analyze-flamegraph <INPUT.svg> <OUTPUT.md> 10
+```
+
+Then combine the generated report with visual inspection of the flamegraph.
 
 Core reading rules:
 
@@ -210,12 +229,14 @@ For C, C++, Cython, NumPy, or other native-heavy workloads, suggest `--native` o
 ## Dependencies
 
 - `py-spy`
+- `python3`
 - Python application to profile
 - Optional: `speedscope` viewer for `.speedscope.json` files
 
 ## Notes
 
 - Helper script: `py-spy-helper.sh`
+- Flamegraph analyzer: `scripts/analyze-flamegraph.py`
 - Flamegraph template: `docs/flamegraph-interpretation-template.md`
 - Smoke test: `scripts/smoke-py-spy-skill.sh`
 - Upstream project: https://github.com/benfred/py-spy
