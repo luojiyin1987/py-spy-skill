@@ -14,6 +14,7 @@ Use this Skill when diagnosing Python runtime problems such as:
 - gunicorn / uvicorn / celery worker issues
 - multiprocessing subprocess profiling
 - flamegraph or stack dump collection
+- structured flamegraph interpretation reports
 
 ## What this Skill is not for
 
@@ -70,6 +71,18 @@ Record a Python command launched by `py-spy`:
 ```bash
 ./py-spy-helper.sh record-cmd profile.svg -- python app.py
 ```
+
+## Flamegraph Interpretation
+
+Use [`docs/flamegraph-interpretation-template.md`](docs/flamegraph-interpretation-template.md) when turning a flamegraph, speedscope profile, raw sample output, or screenshot into a user-facing diagnosis.
+
+The template emphasizes:
+
+- width means sample frequency, not chronological order
+- height is stack depth, not cost by itself
+- confidence levels for short captures
+- bottleneck classification: CPU, I/O, lock, native, GIL, idle, or inconclusive
+- safe next steps before privileged profiling changes
 
 ## Safety Model
 
