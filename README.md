@@ -34,6 +34,13 @@ Alternative installation methods include downloading upstream releases or using 
 
 ## Quick Start
 
+After cloning this repository:
+
+```bash
+chmod +x py-spy-helper.sh scripts/smoke-py-spy-skill.sh
+bash scripts/smoke-py-spy-skill.sh
+```
+
 Check your environment:
 
 ```bash
