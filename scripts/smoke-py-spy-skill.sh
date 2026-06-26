@@ -10,6 +10,7 @@ FLAMEGRAPH_ANALYZER="$ROOT_DIR/scripts/analyze-flamegraph.py"
 DUMP_ANALYZER="$ROOT_DIR/scripts/analyze-dump.py"
 BOTTLENECK_TREE="$ROOT_DIR/docs/bottleneck-decision-tree.md"
 HIGH_CPU_COOKBOOK="$ROOT_DIR/docs/cookbook/high-cpu.md"
+HANGING_PROCESS_COOKBOOK="$ROOT_DIR/docs/cookbook/hanging-process.md"
 
 fail() {
   printf 'error: %s\n' "$*" >&2
@@ -24,6 +25,7 @@ fail() {
 [[ -f "$DUMP_ANALYZER" ]] || fail "missing dump analyzer"
 [[ -f "$BOTTLENECK_TREE" ]] || fail "missing bottleneck decision tree"
 [[ -f "$HIGH_CPU_COOKBOOK" ]] || fail "missing high CPU cookbook"
+[[ -f "$HANGING_PROCESS_COOKBOOK" ]] || fail "missing hanging process cookbook"
 
 bash -n "$HELPER"
 bash -n "$0"
@@ -44,10 +46,13 @@ grep -q 'analyze-flamegraph' "$SKILL" || fail "SKILL.md missing analyzer workflo
 grep -q 'analyze-dump' "$SKILL" || fail "SKILL.md missing dump analyzer workflow"
 grep -q 'docs/bottleneck-decision-tree.md' "$SKILL" || fail "SKILL.md missing bottleneck tree reference"
 grep -q 'docs/flamegraph-interpretation-template.md' "$SKILL" || fail "SKILL.md missing flamegraph template reference"
+grep -q 'docs/cookbook/hanging-process.md' "$SKILL" || fail "SKILL.md missing hanging process cookbook reference"
 grep -q 'Bottleneck Classification' "$FLAMEGRAPH_TEMPLATE" || fail "flamegraph template missing bottleneck classification section"
 grep -q 'Final Answer Shape' "$FLAMEGRAPH_TEMPLATE" || fail "flamegraph template missing final answer shape"
 grep -q 'Decision Tree' "$BOTTLENECK_TREE" || fail "bottleneck tree missing decision tree section"
 grep -q 'High CPU Python Process' "$HIGH_CPU_COOKBOOK" || fail "high CPU cookbook missing title"
+grep -q 'Hanging or Stuck Python Process' "$HANGING_PROCESS_COOKBOOK" || fail "hanging process cookbook missing title"
+grep -q 'Capture a second dump' "$HANGING_PROCESS_COOKBOOK" || fail "hanging process cookbook missing repeated dump guidance"
 
 tmp_dir="$(mktemp -d)"
 trap 'rm -rf "$tmp_dir"' EXIT
