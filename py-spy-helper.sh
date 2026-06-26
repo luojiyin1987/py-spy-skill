@@ -9,6 +9,7 @@ Usage:
   ./py-spy-helper.sh doctor
   ./py-spy-helper.sh record-pid <PID> [OUTPUT.svg] [DURATION_SECONDS]
   ./py-spy-helper.sh dump-pid <PID> [OUTPUT.txt]
+  ./py-spy-helper.sh analyze-dump <INPUT.txt> [OUTPUT.md] [TOP_N]
   ./py-spy-helper.sh top-pid <PID>
   ./py-spy-helper.sh record-cmd [OUTPUT.svg] -- <python command...>
   ./py-spy-helper.sh analyze-flamegraph <INPUT.svg> [OUTPUT.md] [TOP_N]
@@ -128,6 +129,22 @@ case "$cmd" in
     # Intentionally no --locals by default: locals may expose secrets.
     py-spy dump --pid "$pid" > "$output"
     printf 'Wrote dump: %s\n' "$output"
+    ;;
+
+  analyze-dump)
+    need_python3
+    input="${2:-}"
+    output="${3:-py-spy-dump-analysis.md}"
+    top_n="${4:-10}"
+
+    [[ -n "$input" ]] || fail "analyze-dump requires an input dump text file"
+    [[ -f "$input" ]] || fail "input file not found: $input"
+    is_integer "$top_n" || fail "TOP_N must be an integer"
+
+    analyzer="$(script_dir)/scripts/analyze-dump.py"
+    [[ -f "$analyzer" ]] || fail "dump analyzer script not found: $analyzer"
+
+    python3 "$analyzer" "$input" --output "$output" --top "$top_n"
     ;;
 
   top-pid)
