@@ -130,6 +130,7 @@ The dump analyzer groups repeated leaf frames and classifies common wait pattern
 ## Cookbook
 
 - [`docs/cookbook/high-cpu.md`](docs/cookbook/high-cpu.md): high CPU process or worker workflow
+- [`docs/cookbook/hanging-process.md`](docs/cookbook/hanging-process.md): hanging process, stuck request, low-CPU wait, or blocked worker workflow
 
 ## Safety Model
 
